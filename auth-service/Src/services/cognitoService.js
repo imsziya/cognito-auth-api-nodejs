@@ -5,13 +5,15 @@ const {
   InitiateAuthCommand,
   AdminGetUserCommand,
   ListUsersCommand,
-  AdminDeleteUserCommand } = require('@aws-sdk/client-cognito-identity-provider');
-
-const client = new CognitoIdentityProviderClient({ region: process.env.AWS_REGION});
+  AdminDeleteUserCommand,AuthFlowType } = require('@aws-sdk/client-cognito-identity-provider');
+const client = new CognitoIdentityProviderClient({ region: process.env.AWS_REGION,credentials: {
+  accessKeyId: process.env.AWS_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SECRET_KEY,
+}});
 
 const signUp = async ({ username, password, attributes }) => {
   const params = {
-    ClientId: process.env.COGNITO_CLIENT_ID,
+    ClientId: process.env.AWS_CLIENT_ID,
     Username: username,
     Password: password,
     UserAttributes: attributes.map(({ name, value }) => ({ Name: name, Value: value })),
@@ -21,8 +23,8 @@ const signUp = async ({ username, password, attributes }) => {
 
 const signIn = async ({ username, password }) => {
   const params = {
-    AuthFlow: 'USER_PASSWORD_AUTH',
-    ClientId: process.env.COGNITO_CLIENT_ID,
+    AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
+    ClientId: process.env.AWS_CLIENT_ID,
     AuthParameters: {
       USERNAME: username,
       PASSWORD: password,
@@ -33,7 +35,7 @@ const signIn = async ({ username, password }) => {
 
 const getUser = async (username) => {
   const params = {
-    UserPoolId: process.env.COGNITO_USER_POOL_ID,
+    UserPoolId: process.env.AWS_POOL_ID,
     Username: username,
   };
   return await client.send(new AdminGetUserCommand(params));
@@ -41,14 +43,14 @@ const getUser = async (username) => {
 
 const listUsers = () => {
   const command = new ListUsersCommand({
-    UserPoolId: process.env.COGNITO_USER_POOL_ID,
+    UserPoolId: process.env.AWS_POOL_ID,
   });
   return client.send(command);
 };
 
 const adminDeleteUser = async (username) => {
   const params = {
-    UserPoolId: process.env.COGNITO_USER_POOL_ID,
+    UserPoolId: process.env.AWS_POOL_ID,
     Username: username,
   };
   return await client.send(new AdminDeleteUserCommand(params));

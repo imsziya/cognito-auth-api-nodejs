@@ -13,6 +13,7 @@ const handleSignUp = async (req, res) => {
       password,
       attributes: [
         { name: 'email', value: email },
+        { name: 'name', value: given_name + " " +  family_name},
         { name: 'given_name', value: given_name },
         { name: 'family_name', value: family_name },
         { name: 'phone_number', value: phone_number },
